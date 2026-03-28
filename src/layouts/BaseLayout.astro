@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'Independent reviews of AI automation tools.',
+  canonicalUrl = Astro.url.href,
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const siteTitle = title === 'OpenClaw Alt' ? title : `${title} | OpenClaw Alt`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="OpenClaw Alt" />
+    <meta property="og:image" content={ogImage} />
+
+    <title>{siteTitle}</title>
+  </head>
+  <body class="bg-white text-gray-900 min-h-screen flex flex-col text-[17px] leading-relaxed">
+
+    <!-- Header -->
+    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <nav class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <a href="/" class="text-xl font-bold text-gray-900 hover:text-indigo-700 transition-colors">
+          OpenClaw Alt
+        </a>
+        <div class="flex items-center gap-6 text-sm font-medium text-gray-600">
+          <a href="/" class="hover:text-gray-900 transition-colors">Home</a>
+          <a href="/about" class="hover:text-gray-900 transition-colors">About</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Trust line -->
+    <div class="border-b border-gray-100 bg-white">
+      <p class="max-w-5xl mx-auto px-4 sm:px-6 py-2 text-xs text-gray-400 text-center">
+        We independently evaluate every tool we recommend. If you buy through our links, we may earn a commission.
+      </p>
+    </div>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 mt-16 bg-gray-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+          <p class="font-medium text-gray-700">OpenClaw Alt</p>
+          <div class="flex gap-5">
+            <a href="/about" class="hover:text-gray-900 transition-colors">About</a>
+            <a href="/disclosure" class="hover:text-gray-900 transition-colors">Disclosure</a>
+          </div>
+          <p>© 2026 OpenClaw Alt. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>
