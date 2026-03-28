@@ -33,9 +33,7 @@ const siteTitle = title === 'OpenClaw Alt' ? title : `${title} | OpenClaw Alt`;
     <meta property="og:site_name" content="OpenClaw Alt" />
     <meta property="og:image" content={ogImage} />
     <title>{siteTitle}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Fonts are self-hosted via /public/fonts — no external requests -->
     <slot name="head" />
   </head>
   <body class="noise-bg min-h-screen flex flex-col text-[17px] leading-relaxed" style="background-color: #0f1117; color: #e2e8f0; font-family: 'DM Sans', sans-serif;">

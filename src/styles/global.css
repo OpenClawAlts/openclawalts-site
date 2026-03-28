@@ -1,6 +1,53 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ── Self-hosted fonts ────────────────────────────────────────────────────── */
+
+/* Fraunces — display / heading (variable font, latin) */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-normal-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-italic-latin.woff2') format('woff2');
+}
+
+/* DM Serif Display (latin) */
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/dm-serif-display-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/dm-serif-display-italic.woff2') format('woff2');
+}
+
+/* DM Sans — body (variable font, latin, covers 100–900) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/dm-sans-latin.woff2') format('woff2');
+}
+
+/* ── Font utilities ───────────────────────────────────────────────────────── */
+
 /* Fraunces heading font utility */
 .font-display {
   font-family: 'Fraunces', serif;
@@ -9,6 +56,26 @@
 /* DM Sans body */
 body {
   font-family: 'DM Sans', sans-serif;
+}
+
+/* Ensure consistent prose contrast across all pages */
+.prose.prose-invert {
+  --tw-prose-body: #cbd5e1;
+  --tw-prose-headings: #f1f5f9;
+  --tw-prose-lead: #94a3b8;
+  --tw-prose-links: #00d4aa;
+  --tw-prose-bold: #ffffff;
+  --tw-prose-counters: #64748b;
+  --tw-prose-bullets: #475569;
+  --tw-prose-hr: rgba(255,255,255,0.1);
+  --tw-prose-quotes: #94a3b8;
+  --tw-prose-quote-borders: #00d4aa;
+  --tw-prose-captions: #64748b;
+  --tw-prose-code: #e2e8f0;
+  --tw-prose-pre-code: #cbd5e1;
+  --tw-prose-pre-bg: #161b26;
+  --tw-prose-th-borders: rgba(255,255,255,0.1);
+  --tw-prose-td-borders: rgba(255,255,255,0.06);
 }
 
 /* Subtle noise texture */
