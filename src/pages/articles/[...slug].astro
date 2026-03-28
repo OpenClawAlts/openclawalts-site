@@ -34,24 +34,15 @@ if (article.data.hero_image) {
   }
 }
 
-// Read tools from frontmatter (may be undefined for articles without tools)
-const frontmatterTools = article.data.tools ?? [];
-
-// Fetch per-tool images at build time using image_query from frontmatter
-const toolImages = await Promise.all(
-  frontmatterTools.map((tool: { image_query?: string; name: string }) =>
-    tool.image_query ? fetchHeroImage(tool.image_query) : fetchHeroImage(tool.name)
-  )
-);
-
-// Merge images into tool data
-const tools = frontmatterTools.map((tool: any, i: number) => ({
-  ...tool,
-  image: toolImages[i],
-}));
-
-// Read top pick from frontmatter
-const topPick = article.data.top_pick ?? null;
+// Fetch per-tool images at build time (dynamic from frontmatter)
+const toolImages: Record<string, Awaited<ReturnType<typeof fetchHeroImage>>> = {};
+if (article.data.tools) {
+  await Promise.all(
+    article.data.tools.map(async (tool) => {
+      toolImages[tool.key] = await fetchHeroImage(tool.image_query ?? tool.name);
+    })
+  );
+}
 
 const canonicalUrl = `https://openclawalts.com/articles/${article.id}`;
 
@@ -89,90 +80,86 @@ const jsonLd = JSON.stringify({
   jsonLd={jsonLd}
   heroImage={heroImage}
 >
-  <!-- Top Pick card (from frontmatter) -->
-  {topPick && (
-    <div slot="top-pick" class="bg-[#1a1f2e] border border-emerald-500/30 rounded-xl p-5">
-      <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">&#11088; Editor's Top Pick</p>
-      <p class="text-base font-semibold text-gray-100 mb-1">{topPick.headline}</p>
-      <p class="text-sm text-gray-400 mb-4">{topPick.summary}</p>
-      <a href={topPick.href} class="inline-block px-5 py-2.5 bg-emerald-500 text-gray-950 text-sm font-bold rounded-lg hover:bg-emerald-400 transition-colors">
-        {topPick.cta}
+  <!-- Top Pick card (dynamic from frontmatter) -->
+  {article.data.top_pick && (
+    <div slot="top-pick" style="background: #1a1f2e; border-left: 3px solid #00d4aa; border-radius: 8px; padding: 1.25rem;">
+      <p style="font-size: 0.7rem; font-weight: 700; color: #00d4aa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">⭐ Editor's Top Pick</p>
+      <p style="font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.25rem;">{article.data.top_pick.name} — {article.data.top_pick.label}</p>
+      <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 1rem;">{article.data.top_pick.description}</p>
+      <a href={article.data.top_pick.href} style="display: inline-block; padding: 0.5rem 1.25rem; background: #00d4aa; color: #0f1117; font-size: 0.875rem; font-weight: 700; border-radius: 4px; text-decoration: none;">
+        Try {article.data.top_pick.name} →
       </a>
     </div>
   )}
 
   <Content />
 
-  <!-- Inline CTA cards with tool images -->
-  {tools.length > 0 && (
+  <!-- Inline CTA cards (from frontmatter tools) -->
+  {article.data.tools && article.data.tools.length > 0 && (
     <div class="not-prose mt-10 space-y-4">
-      {tools.map((tool: any) => (
-        <div class={`bg-[#161b26] border rounded-xl overflow-hidden flex flex-col sm:flex-row ${tool.accent ? 'border-emerald-500/40' : 'border-gray-700/50'}`}>
-          {tool.image && (
-            <div class="sm:w-40 shrink-0 overflow-hidden bg-gray-800" style="min-height: 120px;">
-              <img
-                src={tool.image.url}
-                alt={tool.image.alt}
-                class="w-full h-full object-cover"
-                style="min-height: 120px;"
-                loading="lazy"
-              />
-            </div>
-          )}
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 flex-1">
-            <div>
-              <p class={`text-xs font-semibold uppercase tracking-wider mb-0.5 ${tool.accent ? 'text-emerald-400' : 'text-gray-500'}`}>{tool.label}</p>
-              <p class="text-base font-bold text-gray-100 mb-0.5">{tool.name}</p>
-              <p class="text-sm text-gray-400">{tool.description}</p>
-              {tool.image && (
-                <p class="text-xs text-gray-600 mt-1">
-                  Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
-                </p>
+      {article.data.tools.map((tool) => {
+        const img = toolImages[tool.key];
+        return (
+          <div style="background: #1a1f2e; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden;">
+            <div class="flex flex-col sm:flex-row">
+              {img && (
+                <div class="sm:w-40 shrink-0 overflow-hidden bg-gray-800" style="min-height: 120px;">
+                  <img src={img.url} alt={img.alt} class="w-full h-full object-cover" style="min-height: 120px;" loading="lazy" />
+                </div>
               )}
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 flex-1">
+                <div>
+                  <p style={`font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; color: ${tool.accent ? '#00d4aa' : '#64748b'};`}>{tool.label}</p>
+                  <p style="font-size: 1rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.25rem;">{tool.name}</p>
+                  <p style="font-size: 0.875rem; color: #94a3b8;">{tool.description}</p>
+                  {img && (
+                    <p style="font-size: 0.7rem; color: #334155; margin-top: 0.5rem;">
+                      Photo: <a href={img.unsplashUrl} target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #475569;">{img.photographer}</a> / Unsplash
+                    </p>
+                  )}
+                </div>
+                <a href={tool.href} class="shrink-0 whitespace-nowrap" style="display: inline-block; padding: 0.75rem 1.5rem; background: #00d4aa; color: #0f1117; font-size: 0.875rem; font-weight: 700; border-radius: 4px; text-decoration: none;">
+                  {tool.cta}
+                </a>
+              </div>
             </div>
-            <a href={tool.href} class={`shrink-0 inline-block px-6 py-3 text-sm font-bold rounded-lg transition-colors whitespace-nowrap ${tool.accent ? 'bg-emerald-500 text-gray-950 hover:bg-emerald-400' : 'bg-gray-700 text-gray-100 hover:bg-gray-600'}`}>
-              {tool.cta}
-            </a>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   )}
 
-  <!-- Bottom CTA summary grid -->
-  {tools.length > 0 && (
-    <div class="not-prose mt-14 border-t border-gray-700/50 pt-10">
-      <h2 class="text-2xl font-bold text-gray-100 mb-2">Ready to get started?</h2>
-      <p class="text-gray-400 mb-8">Each tool below has a free trial or demo. Pick the one that fits your workflow.</p>
-
+  <!-- Bottom summary grid (from frontmatter tools) -->
+  {article.data.tools && article.data.tools.length > 0 && (
+    <div class="not-prose mt-14 pt-10" style="border-top: 1px solid rgba(255,255,255,0.08);">
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.5rem; font-family: 'Fraunces', serif;">Ready to get started?</h2>
+      <p style="color: #64748b; margin-bottom: 2rem;">Each tool below has a free trial or demo.</p>
       <div class="grid gap-4 sm:grid-cols-3">
-        {tools.map((tool: any) => (
-          <div class={`border rounded-xl overflow-hidden flex flex-col ${tool.accent ? 'border-emerald-500/40 bg-[#1a1f2e]' : 'border-gray-700/50 bg-[#161b26]'}`}>
-            {tool.image && (
-              <div class="w-full overflow-hidden bg-gray-800" style="height: 140px;">
-                <img
-                  src={tool.image.url}
-                  alt={tool.image.alt}
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            )}
-            <div class="p-5 flex flex-col flex-1">
-              <p class={`text-xs font-semibold uppercase tracking-wider mb-1 ${tool.accent ? 'text-emerald-400' : 'text-gray-500'}`}>{tool.label}</p>
-              <h3 class="text-lg font-bold text-gray-100 mb-2">{tool.name}</h3>
-              <p class="text-sm text-gray-400 flex-1 mb-4">{tool.description}</p>
-              {tool.image && (
-                <p class="text-xs text-gray-600 mb-3">
-                  Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
-                </p>
+        {article.data.tools.map((tool) => {
+          const img = toolImages[tool.key];
+          return (
+            <div style={`background: #1a1f2e; border: 1px solid ${tool.accent ? '#00d4aa33' : 'rgba(255,255,255,0.08)'}; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;`}>
+              {img && (
+                <div style="height: 140px; overflow: hidden; background: #0f1117;">
+                  <img src={img.url} alt={img.alt} class="w-full h-full object-cover" loading="lazy" />
+                </div>
               )}
-              <a href={tool.href} class={`block w-full text-center px-4 py-3 text-sm font-bold rounded-lg transition-colors ${tool.accent ? 'bg-emerald-500 text-gray-950 hover:bg-emerald-400' : 'bg-gray-700 text-gray-100 hover:bg-gray-600'}`}>
-                {tool.cta}
-              </a>
+              <div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">
+                <p style={`font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; color: ${tool.accent ? '#00d4aa' : '#64748b'};`}>{tool.label}</p>
+                <p style="font-size: 1.125rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.5rem;">{tool.name}</p>
+                <p style="font-size: 0.875rem; color: #94a3b8; flex: 1; margin-bottom: 1rem;">{tool.description}</p>
+                {img && (
+                  <p style="font-size: 0.65rem; color: #334155; margin-bottom: 0.75rem;">
+                    Photo: <a href={img.unsplashUrl} target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">{img.photographer}</a> / Unsplash
+                  </p>
+                )}
+                <a href={tool.href} style="display: block; text-align: center; padding: 0.75rem 1rem; background: #00d4aa; color: #0f1117; font-size: 0.875rem; font-weight: 700; border-radius: 4px; text-decoration: none;">
+                  {tool.cta}
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   )}
