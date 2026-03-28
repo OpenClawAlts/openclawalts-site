@@ -57,7 +57,6 @@ n8n is the open-source heavyweight in this space. It's been around longer than m
 
 **Pricing:** Free self-hosted. Cloud starts at $26/month (Starter), with Pro at $99 and Business at $359.
 
-**Commission link:** [n8n Affiliate Program](https://n8n.io/affiliates) — 30% recurring for 12 months
 
 **When to choose n8n:** You want full control over your automation infrastructure, you have technical resources, or self-hosting is a requirement for compliance or cost reasons.
 
@@ -77,7 +76,6 @@ Lindy's pitch is simple: stop building workflows and let AI agents do the work f
 
 **Pricing:** Plus at $49.99/month, Pro at $59.99/month (annual discount ~17%)
 
-**Commission link:** [Lindy Partner Program](https://www.lindy.ai/partners) — 30% first year, 15% second year
 
 **When to choose Lindy:** You want AI agents that feel like actual assistants, not just fancy if-this-then-that. You're okay trading some flexibility for speed and simplicity.
 
@@ -97,7 +95,6 @@ GetDynamIQ positions itself as the platform for building *custom* AI agents — 
 
 **Pricing:** Custom quote (contact sales)
 
-**Commission link:** [GetDynamIQ Affiliate Program](https://www.getdynamiq.ai/affiliate-program) — 50% for 12 months
 
 **When to choose GetDynamIQ:** You have specific, complex workflows that generic automation tools can't handle, and you want to build custom AI agents to run them. Budget isn't the primary constraint.
 
