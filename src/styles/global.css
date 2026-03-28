@@ -1,2 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* ── Custom theme tokens ───────────────────────────────── */
+@theme {
+  --color-surface-base: #0f1117;
+  --color-surface-raised: #161b26;
+  --color-surface-overlay: #1a1f2e;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-muted: rgba(255, 255, 255, 0.12);
+  --color-accent: #34d399;
+  --color-accent-hover: #6ee7b7;
+}
+
+html {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'DM Serif Display', Georgia, serif;
+}
+
+/* ── Noise grain texture overlay ────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── Prose dark overrides ───────────────────────────────── */
+.prose-dark {
+  --tw-prose-body: #c9cdd5;
+  --tw-prose-headings: #f1f3f5;
+  --tw-prose-lead: #9ca3af;
+  --tw-prose-links: #34d399;
+  --tw-prose-bold: #f1f3f5;
+  --tw-prose-counters: #6b7280;
+  --tw-prose-bullets: #4b5563;
+  --tw-prose-hr: rgba(255, 255, 255, 0.1);
+  --tw-prose-quotes: #d1d5db;
+  --tw-prose-quote-borders: #34d399;
+  --tw-prose-captions: #6b7280;
+  --tw-prose-code: #f1f3f5;
+  --tw-prose-pre-code: #e5e7eb;
+  --tw-prose-pre-bg: #161b26;
+  --tw-prose-th-borders: rgba(255, 255, 255, 0.12);
+  --tw-prose-td-borders: rgba(255, 255, 255, 0.08);
+}
+
+/* Table styling for dark theme */
+.prose-dark th {
+  background-color: #161b26;
+  color: #d1d5db;
+}
+
+.prose-dark td {
+  color: #c9cdd5;
+}
+
+.prose-dark tr {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2f3e;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3f4e;
+}

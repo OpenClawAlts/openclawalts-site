@@ -34,12 +34,24 @@ if (article.data.hero_image) {
   }
 }
 
-// Fetch per-tool images at build time
-const [n8nImage, lindyImage, dynamiqImage] = await Promise.all([
-  fetchHeroImage('workflow automation'),
-  fetchHeroImage('productivity software'),
-  fetchHeroImage('software automation'),
-]);
+// Read tools from frontmatter (may be undefined for articles without tools)
+const frontmatterTools = article.data.tools ?? [];
+
+// Fetch per-tool images at build time using image_query from frontmatter
+const toolImages = await Promise.all(
+  frontmatterTools.map((tool: { image_query?: string; name: string }) =>
+    tool.image_query ? fetchHeroImage(tool.image_query) : fetchHeroImage(tool.name)
+  )
+);
+
+// Merge images into tool data
+const tools = frontmatterTools.map((tool: any, i: number) => ({
+  ...tool,
+  image: toolImages[i],
+}));
+
+// Read top pick from frontmatter
+const topPick = article.data.top_pick ?? null;
 
 const canonicalUrl = `https://openclawalts.com/articles/${article.id}`;
 
@@ -65,40 +77,6 @@ const jsonLd = JSON.stringify({
     "@id": canonicalUrl
   }
 });
-
-// Tool config for CTA cards
-const tools = [
-  {
-    key: 'n8n',
-    label: 'Best for self-hosting',
-    name: 'n8n',
-    description: 'Open-source, self-hostable, fully customizable.',
-    cta: 'Try n8n Free →',
-    href: '#',
-    accent: false,
-    image: n8nImage,
-  },
-  {
-    key: 'lindy',
-    label: 'Best for AI-first automation',
-    name: 'Lindy',
-    description: 'AI agents that act proactively. Fastest path to automation.',
-    cta: 'Try Lindy →',
-    href: '#',
-    accent: true,
-    image: lindyImage,
-  },
-  {
-    key: 'getdynamiq',
-    label: 'Best for enterprise / custom agents',
-    name: 'GetDynamIQ',
-    description: 'Custom AI agents built for complex business workflows.',
-    cta: 'Get a Demo →',
-    href: '#',
-    accent: false,
-    image: dynamiqImage,
-  },
-];
 ---
 
 <ArticleLayout
@@ -111,86 +89,92 @@ const tools = [
   jsonLd={jsonLd}
   heroImage={heroImage}
 >
-  <!-- Top Pick card -->
-  <div slot="top-pick" class="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
-    <p class="text-xs font-bold text-indigo-500 uppercase tracking-wider mb-2">⭐ Editor's Top Pick</p>
-    <p class="text-base font-semibold text-gray-900 mb-1">Lindy — Best for AI-First Automation</p>
-    <p class="text-sm text-gray-600 mb-4">Fastest path to working AI agents. Proactive, low-config, built for the modern stack.</p>
-    <a href="#" class="inline-block px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors">
-      Try Lindy →
-    </a>
-  </div>
+  <!-- Top Pick card (from frontmatter) -->
+  {topPick && (
+    <div slot="top-pick" class="bg-[#1a1f2e] border border-emerald-500/30 rounded-xl p-5">
+      <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">&#11088; Editor's Top Pick</p>
+      <p class="text-base font-semibold text-gray-100 mb-1">{topPick.headline}</p>
+      <p class="text-sm text-gray-400 mb-4">{topPick.summary}</p>
+      <a href={topPick.href} class="inline-block px-5 py-2.5 bg-emerald-500 text-gray-950 text-sm font-bold rounded-lg hover:bg-emerald-400 transition-colors">
+        {topPick.cta}
+      </a>
+    </div>
+  )}
 
   <Content />
 
   <!-- Inline CTA cards with tool images -->
-  <div class="not-prose mt-10 space-y-4">
-    {tools.map((tool) => (
-      <div class={`bg-white border rounded-xl overflow-hidden flex flex-col sm:flex-row ${tool.accent ? 'border-indigo-200' : ''}`} style={tool.accent ? '' : 'border-color: #F3F4F6;'}>
-        {tool.image && (
-          <div class="sm:w-40 shrink-0 overflow-hidden bg-gray-100" style="min-height: 120px;">
-            <img
-              src={tool.image.url}
-              alt={tool.image.alt}
-              class="w-full h-full object-cover"
-              style="min-height: 120px;"
-              loading="lazy"
-            />
-          </div>
-        )}
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 flex-1">
-          <div>
-            <p class={`text-xs font-semibold uppercase tracking-wider mb-0.5 ${tool.accent ? 'text-indigo-500' : 'text-gray-400'}`}>{tool.label}</p>
-            <p class="text-base font-bold text-gray-900 mb-0.5">{tool.name}</p>
-            <p class="text-sm text-gray-500">{tool.description}</p>
-            {tool.image && (
-              <p class="text-xs text-gray-300 mt-1">
-                Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
-              </p>
-            )}
-          </div>
-          <a href={tool.href} class="shrink-0 inline-block px-6 py-3 text-sm font-bold rounded-lg text-white transition-colors whitespace-nowrap" style="background-color: #4F46E5;">
-            {tool.cta}
-          </a>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <!-- Bottom CTA summary grid -->
-  <div class="not-prose mt-14 border-t border-gray-200 pt-10">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Ready to get started?</h2>
-    <p class="text-gray-500 mb-8">Each tool below has a free trial or demo. Pick the one that fits your workflow.</p>
-
-    <div class="grid gap-4 sm:grid-cols-3">
-      {tools.map((tool) => (
-        <div class={`border rounded-xl overflow-hidden flex flex-col ${tool.accent ? 'border-indigo-200 bg-indigo-50' : 'border-gray-200'}`}>
+  {tools.length > 0 && (
+    <div class="not-prose mt-10 space-y-4">
+      {tools.map((tool: any) => (
+        <div class={`bg-[#161b26] border rounded-xl overflow-hidden flex flex-col sm:flex-row ${tool.accent ? 'border-emerald-500/40' : 'border-gray-700/50'}`}>
           {tool.image && (
-            <div class="w-full overflow-hidden bg-gray-100" style="height: 140px;">
+            <div class="sm:w-40 shrink-0 overflow-hidden bg-gray-800" style="min-height: 120px;">
               <img
                 src={tool.image.url}
                 alt={tool.image.alt}
                 class="w-full h-full object-cover"
+                style="min-height: 120px;"
                 loading="lazy"
               />
             </div>
           )}
-          <div class="p-5 flex flex-col flex-1">
-            <p class={`text-xs font-semibold uppercase tracking-wider mb-1 ${tool.accent ? 'text-indigo-500' : 'text-gray-400'}`}>{tool.label}</p>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">{tool.name}</h3>
-            <p class="text-sm text-gray-500 flex-1 mb-4">{tool.description}</p>
-            {tool.image && (
-              <p class="text-xs text-gray-300 mb-3">
-                Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
-              </p>
-            )}
-            <a href={tool.href} class={`block w-full text-center px-4 py-3 text-white text-sm font-bold rounded-lg transition-colors ${tool.accent ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-900 hover:bg-gray-700'}`}>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 flex-1">
+            <div>
+              <p class={`text-xs font-semibold uppercase tracking-wider mb-0.5 ${tool.accent ? 'text-emerald-400' : 'text-gray-500'}`}>{tool.label}</p>
+              <p class="text-base font-bold text-gray-100 mb-0.5">{tool.name}</p>
+              <p class="text-sm text-gray-400">{tool.description}</p>
+              {tool.image && (
+                <p class="text-xs text-gray-600 mt-1">
+                  Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
+                </p>
+              )}
+            </div>
+            <a href={tool.href} class={`shrink-0 inline-block px-6 py-3 text-sm font-bold rounded-lg transition-colors whitespace-nowrap ${tool.accent ? 'bg-emerald-500 text-gray-950 hover:bg-emerald-400' : 'bg-gray-700 text-gray-100 hover:bg-gray-600'}`}>
               {tool.cta}
             </a>
           </div>
         </div>
       ))}
     </div>
-  </div>
+  )}
+
+  <!-- Bottom CTA summary grid -->
+  {tools.length > 0 && (
+    <div class="not-prose mt-14 border-t border-gray-700/50 pt-10">
+      <h2 class="text-2xl font-bold text-gray-100 mb-2">Ready to get started?</h2>
+      <p class="text-gray-400 mb-8">Each tool below has a free trial or demo. Pick the one that fits your workflow.</p>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        {tools.map((tool: any) => (
+          <div class={`border rounded-xl overflow-hidden flex flex-col ${tool.accent ? 'border-emerald-500/40 bg-[#1a1f2e]' : 'border-gray-700/50 bg-[#161b26]'}`}>
+            {tool.image && (
+              <div class="w-full overflow-hidden bg-gray-800" style="height: 140px;">
+                <img
+                  src={tool.image.url}
+                  alt={tool.image.alt}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <div class="p-5 flex flex-col flex-1">
+              <p class={`text-xs font-semibold uppercase tracking-wider mb-1 ${tool.accent ? 'text-emerald-400' : 'text-gray-500'}`}>{tool.label}</p>
+              <h3 class="text-lg font-bold text-gray-100 mb-2">{tool.name}</h3>
+              <p class="text-sm text-gray-400 flex-1 mb-4">{tool.description}</p>
+              {tool.image && (
+                <p class="text-xs text-gray-600 mb-3">
+                  Photo: <a href={tool.image.unsplashUrl} target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-400">{tool.image.photographer}</a> / Unsplash
+                </p>
+              )}
+              <a href={tool.href} class={`block w-full text-center px-4 py-3 text-sm font-bold rounded-lg transition-colors ${tool.accent ? 'bg-emerald-500 text-gray-950 hover:bg-emerald-400' : 'bg-gray-700 text-gray-100 hover:bg-gray-600'}`}>
+                {tool.cta}
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
 
 </ArticleLayout>
